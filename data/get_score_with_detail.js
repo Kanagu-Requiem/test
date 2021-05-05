@@ -1,28 +1,27 @@
 javascript:
 if (typeof is_getdata != "undefined") {
-    alert("データ取得済みです。");
-    throw Error("Error: データ取得済み");
+    error("データ取得済みです。");
 } else {
     let make_csv = {
         save: function (data, filename) {
             this.check_data(data);
-            console.info('filename:', filename);
+            console.info("filename:", filename);
             const csv_str = this.to_string(data);
             const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-            const blob = new Blob([bom, csv_str], { 'type': 'text/csv' });
+            const blob = new Blob([bom, csv_str], { "type": "text/csv" });
             const url = window.URL || window.webkitURL;
             const blobURL = url.createObjectURL(blob);
-            let a = document.createElement('a');
+            let a = document.createElement("a");
             a.download = decodeURI(filename);
             a.href = blobURL;
-            a.type = 'text/csv';
+            a.type = "text/csv";
             a.click();
         },
         check_data: function (data) {
             if (data.length == 0)
-                throw Error('Error: 参照データが存在しません。');
+                error("データ取得エラー\ndata_length:0");
             if (!this.is_array(data) || !this.is_object(data[0]))
-                throw Error('Error: スコアが正常に取得できていません。');
+                error("データ取得エラー\nIllegal type");
         },
         to_string: function (data) {
             const keys = Object.keys(data[0]);
@@ -30,17 +29,17 @@ if (typeof is_getdata != "undefined") {
             let csv_str = [].concat([keys], array_data);
             console.log(csv_str);
             return csv_str.map((record) => (
-                record.map((field) => (this.prepare(field))).join(',')
-            )).join('\n');
+                record.map((field) => (this.prepare(field))).join(",")
+            )).join("\n");
         },
         prepare: function (field) {
             return '"' + ('' + field).replace(/"/g, '""') + '"';
         },
         is_object: function (obj) {
-            return '[object Object]' === Object.prototype.toString.call(obj);
+            return "[object Object]" === Object.prototype.toString.call(obj);
         },
         is_array: function (obj) {
-            return '[object Array]' === Object.prototype.toString.call(obj);
+            return "[object Array]" === Object.prototype.toString.call(obj);
         },
     };
 
@@ -55,10 +54,10 @@ if (typeof is_getdata != "undefined") {
             return all_music_data;
         },
         get_data: function (music_id) {
-            const xmlHttp = new XMLHttpRequest();
-            xmlHttp.open("GET", "https://mypage.groovecoaster.jp/sp/json/music_detail.php?music_id=" + music_id, false);
-            xmlHttp.send(null);
-            return JSON.parse(xmlHttp.responseText);
+            const req = new XMLHttpRequest();
+            req.open("GET", "https://mypage.groovecoaster.jp/sp/json/music_detail.php?music_id=" + music_id, false);
+            req.send(null);
+            return JSON.parse(req.responseText);
         },
         status: function (result_data) {
             if (result_data.perfect > 0)
@@ -139,6 +138,11 @@ if (typeof is_getdata != "undefined") {
         req.open("get", "https://raw.githubusercontent.com/Kanagu-Requiem/test/master/data/update_date.txt", false);
         req.send(null);
         return req.responseText;
+    }
+
+    function error(text) {
+        alert("Error: " + text);
+        throw Error("Error: " + text);
     }
 
     is_getdata = 1;
